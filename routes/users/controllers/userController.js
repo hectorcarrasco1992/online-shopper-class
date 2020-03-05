@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const { validationResult } = require('express-validator');
 const faker = require('faker');
-
+const bcrypt = require('bcryptjs')
 module.exports = {
   register: (req, res, next) => {
     const errors = validationResult(req);
@@ -58,6 +58,37 @@ module.exports = {
         })
         .catch(err => reject(err));
     }).catch(err => reject(err));
+  },
+
+  updatePassword: (params,id)=>{
+    return new Promise((resolve,reject)=>{
+      User.findById(id)
+      .then((user)=>{
+        if(!params.oldPassword ||!params.newPassword || !params.repeatNewPassword){
+          console.log('input empty')
+          reject('All inputs must ve filled')
+        }else if(params.newPassword !== params.repeatNewPassword){
+          console.log('unmatch passwords')
+          reject('new passwords do not match')
+        }else{
+          bcrypt.compare(params.oldPassword,user.password)
+          .then((result)=>{
+            if(result === false){
+              console.log('yerr')
+              reject('Old password incorrect')
+            }else{
+              console.log('new password')
+              user.password = params.newPassword
+              user.save().then(user =>resolve(user))
+
+            }
+          }).catch(err => {
+            throw new Error(err)
+          }).catch(err => reject(err))
+
+        }
+      })
+    })
   }
 
   //   register: async (req, res, next) => {

@@ -101,4 +101,14 @@ router.get('/update-profile', (req, res) => {
   }
   return res.redirect('/');
 });
+
+router.put('/update-password',(req,res)=>{
+  userController.updatePassword(req.body,req.user._id)
+  .then((user)=>{
+    res.redirect('/api/users/profile')
+  }).catch(err =>{
+    console.log('hello')
+    return res.redirect('/api/users/update-profile')
+  })
+})
 module.exports = router;
